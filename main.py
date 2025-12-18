@@ -31,8 +31,8 @@ center_ref_y = 0.5
 # --- 3Dシーンの作成 ---
 
 # 箱のサイズ
-wall_scale = 6
-wall_distance = 3
+wall_scale = 4
+wall_distance = 2.5
 
 # ★壁の色分け（ハッキリした色に変更）★
 # unlit=True で影をなくし、色を鮮やかに見せます
@@ -95,21 +95,28 @@ def update():
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = face_detection.process(image)
 
+    # カメラ映像を表示
+    display_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
     if results.detections:
         for detection in results.detections:
             bbox = detection.location_data.relative_bounding_box
-            
+
             current_face_x = bbox.xmin + bbox.width / 2
             current_face_y = bbox.ymin + bbox.height / 2
-            
+
+            # 左右のみ追従（上下は固定）
             target_x = (current_face_x - center_ref_x) * -15
-            target_y = (current_face_y - center_ref_y) * -10
-            
+
             camera.x = lerp(camera.x, target_x, 0.1)
-            camera.y = lerp(camera.y, target_y, 0.1)
-            
+
             # ロボットの胴体中心を見つめる
             camera.look_at(body)
 
+    # ウェブカメラ映像を別ウィンドウで表示
+    cv2.imshow('Webcam', display_image)
+    cv2.waitKey(1)
+
 app.run()
 cap.release()
+cv2.destroyAllWindows()
